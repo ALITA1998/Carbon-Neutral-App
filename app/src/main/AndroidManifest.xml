@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.hui.carbon">
+    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <uses-feature android:name="android.hardware.sensor.stepcounter"/>
+    <uses-feature android:name="feature:android.hardware.sensor.stepdetector"/>
+    <!--安卓10.0版本以上必须申请的健身运动权限-->
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+
+    <application
+        android:name="com.hui.carbon.UniteApp"
+
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:theme="@style/AppTheme">
+        <activity android:name="com.hui.carbon.MonthChartActivity"></activity>
+        <activity android:name="com.hui.carbon.SettingActivity" />
+        <activity android:name="com.hui.carbon.HistoryActivity" />
+        <activity android:name="com.hui.carbon.AboutActivity" />
+        <activity android:name="com.hui.carbon.SearchActivity" />
+        <activity android:name="com.hui.carbon.RecordActivity" />
+        <activity android:name="com.hui.carbon.loginActivity" />
+        <activity android:name="com.hui.carbon.RegisterActivity" />
+        <activity android:name="com.hui.carbon.MeActivity" />
+        <activity android:name="com.hui.carbon.auto_get.StepCounter" />
+        <activity android:name="com.hui.carbon.TransactionActivity" />
+        <activity android:name="com.hui.carbon.GoodsActivity" />
+        <activity android:name="com.hui.carbon.frag_transaction.SellActivity" />
+
+
+        <activity android:name="com.hui.carbon.MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

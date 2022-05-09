@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable  name="nav">
+        <!--图片-->
+        <attr name="icon" format="reference"></attr>
+        <!--字体-->
+        <attr name="hint" format="string"></attr>
+        <!--是否密文-->
+        <attr name="pass" format="boolean"></attr>
+        <attr name="right_icon" format="reference"></attr>
+    </declare-styleable>
+</resources>

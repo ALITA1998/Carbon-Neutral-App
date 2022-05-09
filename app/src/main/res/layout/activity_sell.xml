@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".frag_transaction.SellActivity">
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/goods_carbon_balance"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="请输入您要卖出的碳配额量" />
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/goods_price"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:hint="请输入您想卖的价格" />
+
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/goods_desc"
+        android:layout_width="match_parent"
+
+        android:layout_height="wrap_content"
+        android:hint="请输入您的注意事项或描述" />
+
+<!--    <com.google.android.material.textfield.TextInputEditText-->
+<!--        android:id="@+id/goods_icon"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:hint="请输入你要卖的商品的图片地址" />-->
+<!--    <com.google.android.material.textfield.TextInputEditText-->
+<!--        android:id="@+id/goods_type"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:hint="请输入你要卖的商品的类型" />-->
+
+<!--    <com.google.android.material.button.MaterialButton-->
+<!--        android:id="@+id/sell"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="发布" />-->
+    <Button
+        android:id="@+id/sell"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/autoget_btn_bg"
+        android:text = "发布"/>
+</LinearLayout>
