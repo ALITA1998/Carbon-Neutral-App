@@ -1,2 +1,2 @@
-# Carbon-Neutral_App
+# Carbon-Neutral-App
 An app for carbon neutral
