@@ -16,7 +16,7 @@ import com.hui.carbon.HistoryActivity;
 import com.hui.carbon.MonthChartActivity;
 import com.hui.carbon.R;
 import com.hui.carbon.SettingActivity;
-import com.hui.carbon.loginActivity;
+import com.hui.carbon.LoginActivity;
 
 public class MoreDialog extends Dialog implements View.OnClickListener {
     Button personBtn,settingBtn,historyBtn,infoBtn;
@@ -46,7 +46,7 @@ public class MoreDialog extends Dialog implements View.OnClickListener {
         Intent intent = new Intent();
         switch (v.getId()) {
             case R.id.dialog_more_btn_about:
-                intent.setClass(getContext(), loginActivity.class);
+                intent.setClass(getContext(), LoginActivity.class);
                 getContext().startActivity(intent);
                 break;
             case R.id.dialog_more_btn_setting:

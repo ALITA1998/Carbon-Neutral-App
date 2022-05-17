@@ -22,7 +22,7 @@ import java.util.List;
 public class HistoryActivity extends AppCompatActivity {
     ListView historyLv;
     TextView timeTv;
-
+    UniteApp uniteApp;
     List<AccountBean>mDatas;
     AccountAdapter adapter;
     int year,month;
@@ -31,6 +31,7 @@ public class HistoryActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        uniteApp = (UniteApp) getApplication();
         setContentView(R.layout.activity_history);
         historyLv = findViewById(R.id.history_lv);
         timeTv = findViewById(R.id.history_tv_time);

@@ -4,18 +4,27 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
+import android.widget.Toast;
 
+import com.hui.carbon.RecordActivity;
+import com.hui.carbon.UniteApp;
+import com.hui.carbon.entity.Goods;
+import com.hui.carbon.frag_transaction.SellActivity;
 import com.hui.carbon.utils.FloatUtils;
+import com.rxjava.rxlife.RxLife;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import rxhttp.wrapper.param.RxHttp;
 
 /*
 * 负责管理数据库的类
 *   主要对于表当中的内容进行操作，增删改查
 * */
 public class DBManager {
-
+    UniteApp uniteApp;
     private static SQLiteDatabase db;
     /* 初始化数据库对象*/
     public static void initDB(Context context){
@@ -52,7 +61,8 @@ public class DBManager {
     public static void insertItemToAccounttb(AccountBean bean){
         ContentValues values = new ContentValues();
         values.put("typename",bean.getTypename());
-        values.put("sImageId",bean.getsImageId());
+        values.put("simageid",bean.getsimageid());
+        Log.d("simageid",bean.getsimageid() + "");
         values.put("beizhu",bean.getBeizhu());
         values.put("money",bean.getMoney());
         values.put("time",bean.getTime());
@@ -60,8 +70,11 @@ public class DBManager {
         values.put("month",bean.getMonth());
         values.put("day",bean.getDay());
         values.put("kind",bean.getKind());
+        values.put("username",bean.getUsername());
         db.insert("accounttb",null,values);
     }
+
+
     /*
     * 获取记录表当中某一天的所有排放或者吸收情况
     * */
@@ -75,10 +88,11 @@ public class DBManager {
             String typename = cursor.getString(cursor.getColumnIndex("typename"));
             String beizhu = cursor.getString(cursor.getColumnIndex("beizhu"));
             String time = cursor.getString(cursor.getColumnIndex("time"));
-            int sImageId = cursor.getInt(cursor.getColumnIndex("sImageId"));
+            int simageid = cursor.getInt(cursor.getColumnIndex("simageid"));
             int kind = cursor.getInt(cursor.getColumnIndex("kind"));
             float money = cursor.getFloat(cursor.getColumnIndex("money"));
-            AccountBean accountBean = new AccountBean(id, typename, sImageId, beizhu, money, time, year, month, day, kind);
+            String username = cursor.getString(cursor.getColumnIndex("username"));
+            AccountBean accountBean = new AccountBean(id, username, typename, simageid, beizhu, money, time, year, month, day, kind);
             list.add(accountBean);
         }
         return list;
@@ -97,11 +111,12 @@ public class DBManager {
             String typename = cursor.getString(cursor.getColumnIndex("typename"));
             String beizhu = cursor.getString(cursor.getColumnIndex("beizhu"));
             String time = cursor.getString(cursor.getColumnIndex("time"));
-            int sImageId = cursor.getInt(cursor.getColumnIndex("sImageId"));
+            int simageid = cursor.getInt(cursor.getColumnIndex("simageid"));
             int kind = cursor.getInt(cursor.getColumnIndex("kind"));
             float money = cursor.getFloat(cursor.getColumnIndex("money"));
             int day = cursor.getInt(cursor.getColumnIndex("day"));
-            AccountBean accountBean = new AccountBean(id, typename, sImageId, beizhu, money, time, year, month, day, kind);
+            String username = cursor.getString(cursor.getColumnIndex("username"));
+            AccountBean accountBean = new AccountBean(id, username,typename, simageid, beizhu, money, time, year, month, day, kind);
             list.add(accountBean);
         }
         return list;
@@ -179,13 +194,14 @@ public class DBManager {
             String typename = cursor.getString(cursor.getColumnIndex("typename"));
             String bz = cursor.getString(cursor.getColumnIndex("beizhu"));
             String time = cursor.getString(cursor.getColumnIndex("time"));
-            int sImageId = cursor.getInt(cursor.getColumnIndex("sImageId"));
+            int simageid = cursor.getInt(cursor.getColumnIndex("simageid"));
             int kind = cursor.getInt(cursor.getColumnIndex("kind"));
             float money = cursor.getFloat(cursor.getColumnIndex("money"));
             int year = cursor.getInt(cursor.getColumnIndex("year"));
             int month = cursor.getInt(cursor.getColumnIndex("month"));
             int day = cursor.getInt(cursor.getColumnIndex("day"));
-            AccountBean accountBean = new AccountBean(id, typename, sImageId, bz, money, time, year, month, day, kind);
+            String username = cursor.getString(cursor.getColumnIndex("username"));
+            AccountBean accountBean = new AccountBean(id, username, typename, simageid, bz, money, time, year, month, day, kind);
             list.add(accountBean);
         }
         return list;
@@ -223,7 +239,7 @@ public class DBManager {
                 "order by total desc";
         Cursor cursor = db.rawQuery(sql, new String[]{year + "", month + "", kind + ""});
         while (cursor.moveToNext()) {
-            int sImageId = cursor.getInt(cursor.getColumnIndex("sImageId"));
+            int sImageId = cursor.getInt(cursor.getColumnIndex("simageid"));
             String typename = cursor.getString(cursor.getColumnIndex("typename"));
             float total = cursor.getFloat(cursor.getColumnIndex("total"));
             //计算所占百分比  total /sumMonth
@@ -276,5 +292,14 @@ public class DBManager {
          return carbon_data;
 
      }
+
+    /**同步http请求发来的数据和本地数据库的数据*/
+    public static void syncHttpData(List<AccountBean> accountBeanList){
+        deleteAllAccount();
+        for(int i = 0; i < accountBeanList.size(); i++){
+            insertItemToAccounttb(accountBeanList.get(i));
+        }
+        Log.d("同步", "成功！");
+    }
 
 }

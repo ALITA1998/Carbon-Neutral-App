@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,10 +16,15 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.hui.carbon.entity.User;
+import com.rxjava.rxlife.RxLife;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+
+import rxhttp.wrapper.param.RxHttp;
 /**
  * Created by liuli 2022/4/10
  */
@@ -73,7 +79,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.iv_registeractivity_back: //返回登录页面
-                Intent intent1 = new Intent(this, loginActivity.class);
+                Intent intent1 = new Intent(this, LoginActivity.class);
                 startActivity(intent1);
                 finish();
                 break;
@@ -91,72 +97,91 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
                     Toast.makeText(RegisterActivity.this, "两次输入的密码不一样，请重试！", Toast.LENGTH_LONG).show();
                 }else{
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                Socket socket = new Socket("103.46.128.53", 43872);   //服务端实例化socket对象
-                                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(socket.getOutputStream(), "utf-8");
-                                InputStreamReader inputStreamReader = new InputStreamReader(socket.getInputStream(), "utf-8");
-                                //发送数据 格式为（登录，账号，密码）
-                                outputStreamWriter.write("up " + username+ " " + password);
-                                System.out.println("up " + username+ " " + password);
-                                outputStreamWriter.flush();
-
-                                //收到信息0代表是登录失败，1代表登录成功
-                                final char[] a = new char[10];
-                                final int length = inputStreamReader.read(a);
-
-                                if(a[0]=='0') {
-                                    Looper.prepare();
+//                    new Thread(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            try {
+//                                Socket socket = new Socket("103.46.128.53", 43872);   //服务端实例化socket对象
+//                                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(socket.getOutputStream(), "utf-8");
+//                                InputStreamReader inputStreamReader = new InputStreamReader(socket.getInputStream(), "utf-8");
+//                                //发送数据 格式为（登录，账号，密码）
+//                                outputStreamWriter.write("up " + username+ " " + password);
+//                                System.out.println("up " + username+ " " + password);
+//                                outputStreamWriter.flush();
+//
+//                                //收到信息0代表是登录失败，1代表登录成功
+//                                final char[] a = new char[10];
+//                                final int length = inputStreamReader.read(a);
+//
+//                                if(a[0]=='0') {
+//                                    Looper.prepare();
+//                                    Toast. makeText(RegisterActivity. this, "用户名重复！换个用户名试试吧!", Toast. LENGTH_LONG). show();
+//                                    Looper.loop();
+//                                } else if(a[0]=='1') {
+//                                    Looper.prepare();
+//                                    new AlertDialog.Builder(RegisterActivity.this)
+////                                            .setIcon(R.drawable.wait)
+//                                            .setTitle("提示")
+//                                            .setMessage("是否使用本注册账号登录")
+//                                            .setPositiveButton("是",                                     new DialogInterface.OnClickListener() {
+//                                                @Override
+//                                                public void onClick(DialogInterface dialog, int which) {
+//                                                    //注册成功得到id
+//                                                    String[] strings = (String.valueOf(a, 0, length)).split(" ");
+//                                                    System.out.println(strings[0]);
+//                                                    System.out.println(strings[1]);
+//
+//                                                    Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+//                                                    intent.putExtra("name", username);
+//                                                    startActivity(intent);
+//                                                    //销毁这个activity
+//                                                    finish();
+////                                                    Looper.prepare();
+//                                                    Toast.makeText(RegisterActivity. this, "注册成功!请返回登录!", Toast. LENGTH_LONG). show();
+////                                                    Looper.loop();
+//                                                }
+//                                            })
+//
+//                                            .setNegativeButton("否",                                     new DialogInterface.OnClickListener() {
+//                                                @Override
+//                                                public void onClick(DialogInterface dialog, int which) {
+//                                                    finish();
+//                                                }
+//                                            })
+//                                            .create()
+//                                            .show();
+//                                    Looper.loop();
+//                                }
+//                                outputStreamWriter.close();
+//                                inputStreamReader.close();
+//                                socket.close();
+//                            } catch (IOException e) {
+//                                Looper.prepare();
+//                                Toast.makeText(RegisterActivity.this, "系统连接错误！", Toast.LENGTH_LONG).show();
+//                                Looper.loop();
+//                                e.printStackTrace();
+//                            }
+//                        }
+//                    }).start();
+                    if (TextUtils.isEmpty(username) | TextUtils.isEmpty(password)) {
+                        Toast.makeText(RegisterActivity.this, "请输入账号 or 密码", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    String url = "http://192.168.43.196:8080/login?name=" + username + "&password=" + password;
+                    RxHttp.get(url)
+                            .asObject(User.class)
+                            .as(RxLife.asOnMain(RegisterActivity.this))
+                            .subscribe(s -> {
+                                if(s.getName().equals("0")){
                                     Toast. makeText(RegisterActivity. this, "用户名重复！换个用户名试试吧!", Toast. LENGTH_LONG). show();
-                                    Looper.loop();
-                                } else if(a[0]=='1') {
-                                    Looper.prepare();
-                                    new AlertDialog.Builder(RegisterActivity.this)
-//                                            .setIcon(R.drawable.wait)
-                                            .setTitle("提示")
-                                            .setMessage("是否使用本注册账号登录")
-                                            .setPositiveButton("是",                                     new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialog, int which) {
-                                                    //注册成功得到id
-                                                    String[] strings = (String.valueOf(a, 0, length)).split(" ");
-                                                    System.out.println(strings[0]);
-                                                    System.out.println(strings[1]);
-
-                                                    Intent intent = new Intent(RegisterActivity.this, loginActivity.class);
-                                                    intent.putExtra("name", username);
-                                                    startActivity(intent);
-                                                    //销毁这个activity
-                                                    finish();
-//                                                    Looper.prepare();
-                                                    Toast.makeText(RegisterActivity. this, "注册成功!请返回登录!", Toast. LENGTH_LONG). show();
-//                                                    Looper.loop();
-                                                }
-                                            })
-
-                                            .setNegativeButton("否",                                     new DialogInterface.OnClickListener() {
-                                                @Override
-                                                public void onClick(DialogInterface dialog, int which) {
-                                                    finish();
-                                                }
-                                            })
-                                            .create()
-                                            .show();
-                                    Looper.loop();
+                                }else {
+                                    Toast.makeText(RegisterActivity.this, "注册成功! " + username, Toast.LENGTH_SHORT).show();
+                                    Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                                    startActivity(intent);
                                 }
-                                outputStreamWriter.close();
-                                inputStreamReader.close();
-                                socket.close();
-                            } catch (IOException e) {
-                                Looper.prepare();
-                                Toast.makeText(RegisterActivity.this, "系统连接错误！", Toast.LENGTH_LONG).show();
-                                Looper.loop();
-                                e.printStackTrace();
-                            }
-                        }
-                    }).start();
+                            }, throwable -> {
+                                Toast.makeText(RegisterActivity.this, "失败"+throwable, Toast.LENGTH_SHORT).show();
+                            });
                 }
                 break;
         }

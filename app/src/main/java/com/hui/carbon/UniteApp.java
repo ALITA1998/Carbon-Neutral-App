@@ -11,6 +11,8 @@ public class UniteApp extends Application {
 
     public float money = (float) 0.0; //用户余额
 
+    public float carbon_balance =(float) 1500.0;
+
     public int stepCount = 0;  // 步数
 
     @Override

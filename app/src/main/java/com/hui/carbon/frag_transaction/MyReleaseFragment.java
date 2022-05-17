@@ -6,28 +6,22 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
 import com.hui.carbon.GoodsActivity;
 import com.hui.carbon.R;
 import com.hui.carbon.UniteApp;
 import com.hui.carbon.entity.Goods;
 import com.hui.carbon.entity.GoodsList;
-import com.youth.banner.Banner;
-import com.youth.banner.Transformer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -115,7 +109,7 @@ public class MyReleaseFragment extends Fragment {
 //                        listAdapter.notifyDataSetChanged();
                         data = httpGetJson();
 
-                        listAdapter = new GoodsListAdapter(data, new GoodClickListenner() {
+                        listAdapter = new GoodsListAdapter(data, new GoodClickListener() {
                             @Override
                             public void onClick(View v, int position) {
                                 Log.i("FFPLAY", "Clicked " + view + " on " + position);
@@ -144,7 +138,7 @@ public class MyReleaseFragment extends Fragment {
         });
 
         Log.d("QQQQQ", "onCreateView: " + data);
-        listAdapter = new GoodsListAdapter(data, new GoodClickListenner() {
+        listAdapter = new GoodsListAdapter(data, new GoodClickListener() {
             @Override
             public void onClick(View v, int position) {
                 Log.i("FFPLAY", "Clicked " + view + " on " + position);

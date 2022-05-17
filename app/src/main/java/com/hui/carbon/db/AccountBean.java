@@ -2,8 +2,9 @@ package com.hui.carbon.db;
 /** 描述记录一条数据的相关内容类*/
 public class AccountBean {
     int id;
+    String username;  //用户姓名
     String typename;   //类型
-    int sImageId;   //被选中类型图片
+    int simageid;   //被选中类型图片
     String beizhu;   //备注
     float money;  //价格
     String time ;  //保存时间字符串
@@ -29,12 +30,12 @@ public class AccountBean {
         this.typename = typename;
     }
 
-    public int getsImageId() {
-        return sImageId;
+    public int getsimageid() {
+        return simageid;
     }
 
     public void setsImageId(int sImageId) {
-        this.sImageId = sImageId;
+        this.simageid = sImageId;
     }
 
     public String getBeizhu() {
@@ -93,13 +94,17 @@ public class AccountBean {
         this.kind = kind;
     }
 
+    public String getUsername(){return username;}
+
+    public void setUsername(String username){this.username = username;}
+
     public AccountBean() {
     }
 
-    public AccountBean(int id, String typename, int sImageId, String beizhu, float money, String time, int year, int month, int day, int kind) {
+    public AccountBean(int id, String username, String typename, int simageid, String beizhu, float money, String time, int year, int month, int day, int kind) {
         this.id = id;
         this.typename = typename;
-        this.sImageId = sImageId;
+        this.simageid = simageid;
         this.beizhu = beizhu;
         this.money = money;
         this.time = time;
@@ -107,5 +112,17 @@ public class AccountBean {
         this.month = month;
         this.day = day;
         this.kind = kind;
+        this.username = username;
+    }
+
+    @Override
+    public String toString() {
+        return "Goods{" +
+                "id='" + id + '\'' +
+                ", name='" + username + '\'' +
+                ", typename='" + typename + '\'' +
+                ", sImageId=" + simageid + '\'' +
+
+                '}';
     }
 }

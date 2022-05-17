@@ -1,5 +1,6 @@
 package com.hui.carbon.frag_transaction;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -50,6 +51,14 @@ public class SellActivity extends AppCompatActivity {
                 String price = goods_price.getText().toString().trim();
                 String desc = goods_desc.getText().toString().trim();
                 String carbon_balance = goods_carbon_balance.getText().toString().trim();
+
+                if(Float.parseFloat(carbon_balance) > uniteApp.carbon_balance){
+                    Toast.makeText(SellActivity.this, "碳配额不足！", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                uniteApp.carbon_balance = uniteApp.carbon_balance - Float.parseFloat(carbon_balance);
+                httpUpdateUserCarbonBal(uniteApp.account, uniteApp.carbon_balance);
 //                String icon = goode_icon.getText().toString().trim();
                 String url = "http://192.168.43.196:8080/add?name=" + name + "&price=" + price +  "&carbon_balance=" +carbon_balance + "&description=" + desc;
                 RxHttp.get(url).asObject(Goods.class).as(RxLife.asOnMain(SellActivity.this))
@@ -62,5 +71,21 @@ public class SellActivity extends AppCompatActivity {
 
             }
         });
+
+
+    }
+
+
+    @SuppressLint("CheckResult")
+    public void httpUpdateUserCarbonBal(String userName, Float carbon_balance) {
+        String url = "http://192.168.43.196:8080/updateUserCarbonBal/"+userName +"?user_carbon_bal=" + carbon_balance;
+        RxHttp.get(url)
+                .asString()
+                .subscribe(s -> {
+                    Log.d("QQQQQQQ", "用户信息更新成功！");
+
+                }, throwable -> {
+                    Toast.makeText(this, "用户信息更新失败！" + throwable, Toast.LENGTH_SHORT).show();
+                });
     }
 }

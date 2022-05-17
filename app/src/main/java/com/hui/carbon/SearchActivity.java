@@ -21,11 +21,13 @@ public class SearchActivity extends AppCompatActivity {
     ListView searchLv;
     EditText searchEt;
     TextView emptyTv;
+    UniteApp uniteApp;
     List<AccountBean>mDatas;   //数据源
     AccountAdapter adapter;    //适配器对象
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        uniteApp = (UniteApp) getApplication();
         setContentView(R.layout.activity_search);
         initView();
         mDatas = new ArrayList<>();

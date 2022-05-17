@@ -24,7 +24,7 @@
         <activity android:name="com.hui.carbon.AboutActivity" />
         <activity android:name="com.hui.carbon.SearchActivity" />
         <activity android:name="com.hui.carbon.RecordActivity" />
-        <activity android:name="com.hui.carbon.loginActivity" />
+        <activity android:name="com.hui.carbon.LoginActivity" />
         <activity android:name="com.hui.carbon.RegisterActivity" />
         <activity android:name="com.hui.carbon.MeActivity" />
         <activity android:name="com.hui.carbon.auto_get.StepCounter" />

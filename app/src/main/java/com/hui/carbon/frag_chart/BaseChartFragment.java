@@ -2,6 +2,7 @@ package com.hui.carbon.frag_chart;
 
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,12 +16,18 @@ import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.hui.carbon.R;
+import com.hui.carbon.RecordActivity;
 import com.hui.carbon.adapter.ChartItemAdapter;
+import com.hui.carbon.db.AccountBean;
 import com.hui.carbon.db.ChartItemBean;
 import com.hui.carbon.db.DBManager;
+import com.hui.carbon.entity.Goods;
+import com.rxjava.rxlife.RxLife;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import rxhttp.wrapper.param.RxHttp;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -135,4 +142,6 @@ abstract public class BaseChartFragment extends Fragment {
         mDatas.addAll(list);
         itemAdapter.notifyDataSetChanged();
     }
+
+
 }

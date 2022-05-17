@@ -76,7 +76,7 @@ public class HomeFragment extends Fragment {
 //                        listAdapter.notifyDataSetChanged();
                         data = httpGetJson();
 
-                        listAdapter = new GoodsListAdapter(data, new GoodClickListenner() {
+                        listAdapter = new GoodsListAdapter(data, new GoodClickListener() {
                             @Override
                             public void onClick(View v, int position) {
                                 Log.i("FFPLAY", "Clicked " + view + " on " + position);
@@ -105,7 +105,7 @@ public class HomeFragment extends Fragment {
         });
 
         Log.d("QQQQQ", "onCreateView: " + data);
-        listAdapter = new GoodsListAdapter(data, new GoodClickListenner() {
+        listAdapter = new GoodsListAdapter(data, new GoodClickListener() {
             @Override
             public void onClick(View v, int position) {
                 Log.i("FFPLAY", "Clicked " + view + " on " + position);
@@ -153,7 +153,7 @@ public class HomeFragment extends Fragment {
     public List<Goods> httpGetJson() {
         List<Goods> goods = new ArrayList<>();
 //        String url = "http://39.105.14.128:8080/list";
-        String url = "http://192.168.43.196:8080/list";
+            String url = "http://192.168.43.196:8080/list";
         RxHttp.get(url)
                 .asString()
                 .subscribe(s -> {

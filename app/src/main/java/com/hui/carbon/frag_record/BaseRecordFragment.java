@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,15 +29,20 @@ import com.hui.carbon.auto_get.StepCounter;
 import com.hui.carbon.db.AccountBean;
 import com.hui.carbon.db.DBManager;
 import com.hui.carbon.db.TypeBean;
+import com.hui.carbon.entity.Goods;
 import com.hui.carbon.utils.BeiZhuDialog;
 import com.hui.carbon.utils.KeyBoardUtils;
 import com.hui.carbon.utils.SelectTimeDialog;
+import com.rxjava.rxlife.RxLife;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
+
+import rxhttp.wrapper.param.RxHttp;
 
 /**
  * 记录页面当中的排放模块
@@ -53,7 +59,7 @@ public abstract class BaseRecordFragment extends Fragment implements View.OnClic
     List<TypeBean>typeList;
     TypeBaseAdapter adapter;
     AccountBean accountBean;   //将需要插入到记录表当中的数据保存成对象的形式
-    UniteApp app;
+    UniteApp uniteApp;
 
     long time = -2000;
 
@@ -63,7 +69,9 @@ public abstract class BaseRecordFragment extends Fragment implements View.OnClic
         accountBean = new AccountBean();   //创建对象
         accountBean.setTypename("其他");
         accountBean.setsImageId(R.mipmap.ic_qita_fs);
-
+        //设置默认备注
+        accountBean.setBeizhu("  ");
+//        Log.d("默认备注测试", accountBean.getBeizhu() + "233");
     }
 
     @Override
@@ -140,10 +148,13 @@ public abstract class BaseRecordFragment extends Fragment implements View.OnClic
 
         beizhuTv = view.findViewById(R.id.frag_record_tv_beizhu);
         timeTv = view.findViewById(R.id.frag_record_tv_time);
+
         beizhuTv.setOnClickListener(this);
         timeTv.setOnClickListener(this);
         auto_get_btn.setOnClickListener(this);
-        app = (UniteApp) getActivity().getApplication();
+        uniteApp = (UniteApp) getActivity().getApplication();
+
+
         //让自定义软键盘显示出来
         KeyBoardUtils boardUtils = new KeyBoardUtils(keyboardView, moneyEt);
         boardUtils.showKeyboard();
@@ -151,19 +162,25 @@ public abstract class BaseRecordFragment extends Fragment implements View.OnClic
         boardUtils.setOnEnsureListener(new KeyBoardUtils.OnEnsureListener() {
             @Override
             public void onEnsure() {
-                //获取输入数据
-                String moneyStr = moneyEt.getText().toString();
-                if (TextUtils.isEmpty(moneyStr)||moneyStr.equals("0")) {
-                    getActivity().finish();
-                    return;
-                }
-                float carbon_data = Float.parseFloat(moneyStr);
+                if(uniteApp.account.equals("游客")){
+                    Toast.makeText(getActivity(),"请先登录！",Toast.LENGTH_SHORT).show();
+                }else {
+                    accountBean.setUsername(uniteApp.account);
+                    //获取输入数据
+                    String moneyStr = moneyEt.getText().toString();
+                    if (TextUtils.isEmpty(moneyStr)||moneyStr.equals("0")) {
+                        getActivity().finish();
+                        return;
+                    }
+                    float carbon_data = Float.parseFloat(moneyStr);
 
-                accountBean.setMoney(carbon_data);
-                //获取记录的信息，保存在数据库当中
-                saveAccountToDB();
-                // 返回上一级页面
-                getActivity().finish();
+                    accountBean.setMoney(carbon_data);
+                    //获取记录的信息，保存在数据库当中
+                    saveAccountToDB();
+                    // 返回上一级页面
+                    getActivity().finish();
+                }
+
             }
         });
     }
@@ -379,10 +396,28 @@ public abstract class BaseRecordFragment extends Fragment implements View.OnClic
         }
     }
 
+    //向后端提交插入数据的请求
+    public void httpInsertItemToAccountTb(AccountBean bean, String username){
+        String url = "http://192.168.43.196:8080/addAccount?username=" + username +
+                "&typename=" + bean.getTypename() +  "&simageid=" +bean.getsimageid() +
+                "&beizhu=" + bean.getBeizhu() + "&money=" + bean.getMoney() +
+                "&time=" + bean.getTime() + "&year=" + bean.getYear() +
+                "&month=" + bean.getMonth() + "&day=" + bean.getDay() +
+                "&kind=" + bean.getKind();
+        RxHttp.get(url).asObject(Goods.class).as(RxLife.asOnMain(Objects.requireNonNull(getActivity())))
+                .subscribe(s -> {
+                    Log.d("qqqqqqqqqq", "onClick: "+s.toString());
+
+                }, throwable -> {
+                    Log.d("qqqqqqqqqq", "onClick: "+throwable);
+                });
+    }
+
+
     @Override
     public void onResume() {
         super.onResume();
-        moneyEt.setText("" + app.stepCount);
+        moneyEt.setText("" + uniteApp.stepCount);
     }
 
 }

@@ -55,9 +55,15 @@ public class AccountAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
         AccountBean bean = mDatas.get(position);
-        holder.typeIv.setImageResource(bean.getsImageId());
+        holder.typeIv.setImageResource(bean.getsimageid());
         holder.typeTv.setText(bean.getTypename());
-        holder.beizhuTv.setText(bean.getBeizhu());
+
+        if(bean.getBeizhu() == "null"){
+            holder.beizhuTv.setText(" ");
+        }else {
+            holder.beizhuTv.setText(bean.getBeizhu());
+        }
+//        holder.beizhuTv.setText(bean.getBeizhu());
         holder.moneyTv.setText(bean.getMoney() + "kg");
         if (bean.getYear()==year&&bean.getMonth()==month&&bean.getDay()==day) {
             String time = bean.getTime().split(" ")[1];

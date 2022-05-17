@@ -9,6 +9,6 @@ import android.view.View;
  * @Desc :
  */
 
-public interface GoodClickListenner {
+public interface GoodClickListener {
     public void onClick(View v,int position);
 }

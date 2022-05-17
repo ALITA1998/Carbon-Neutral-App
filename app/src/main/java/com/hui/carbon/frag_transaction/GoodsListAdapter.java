@@ -24,13 +24,13 @@ import java.util.List;
 
 public class GoodsListAdapter extends RecyclerView.Adapter<GoodsListAdapter.GoodsViewHolder> {
     private List<Goods> goods;
-    private GoodClickListenner listenner;
+    private GoodClickListener listener;
     private Context context;
 //    UniteApp uniteApp;
 
-    public GoodsListAdapter(List<Goods> goods, GoodClickListenner listenner) {
+    public GoodsListAdapter(List<Goods> goods, GoodClickListener listener) {
         this.goods = goods;
-        this.listenner = listenner;
+        this.listener = listener;
     }
 
     @NonNull
@@ -44,7 +44,7 @@ public class GoodsListAdapter extends RecyclerView.Adapter<GoodsListAdapter.Good
         row.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                listenner.onClick(v, holder.getLayoutPosition());
+                listener.onClick(v, holder.getLayoutPosition());
             }
         });
         return holder;

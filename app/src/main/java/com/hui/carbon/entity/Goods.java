@@ -14,7 +14,7 @@ public class Goods implements Serializable {
 
     @SerializedName("id")
     @Expose
-    private String id;
+    private Integer id;
     //用户的名字
     @SerializedName("name")
     @Expose
@@ -36,11 +36,11 @@ public class Goods implements Serializable {
 //    private String icon;
 
 
-    public String getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

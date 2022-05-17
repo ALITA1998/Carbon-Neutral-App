@@ -1,9 +1,15 @@
 package com.hui.carbon;
 
 
+import android.accounts.Account;
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Looper;
+import android.os.Parcelable;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -14,10 +20,23 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.gson.Gson;
+import com.hui.carbon.db.AccountBean;
+import com.hui.carbon.db.DBManager;
+import com.hui.carbon.entity.AccountList;
+import com.hui.carbon.entity.Goods;
+import com.hui.carbon.entity.GoodsList;
+import com.hui.carbon.entity.User;
+import com.rxjava.rxlife.RxLife;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
+
+import rxhttp.wrapper.param.RxHttp;
 /**
  * Created by Liuli 2022/4/10
  */
@@ -27,7 +46,7 @@ import java.net.Socket;
  * 就可以把onClick事件写到onCreate()方法之外
  * 这样，onCreate()方法中的代码就不会显得很冗余
  */
-public class loginActivity extends AppCompatActivity implements View.OnClickListener {
+public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
     /**
      * 声明自己写的 DBOpenHelper 对象
      * DBOpenHelper(extends SQLiteOpenHelper) 主要用来
@@ -42,8 +61,8 @@ public class loginActivity extends AppCompatActivity implements View.OnClickList
     private LinearLayout mLlLoginactivityTwo;
     private Button mBtLoginactivityLogin;
 
-    UniteApp app;
-
+    UniteApp uniteApp;
+    final String TAG = "Login";
     /**
      * 创建 Activity 时先来重写 onCreate() 方法
      * 保存实例状态
@@ -84,7 +103,7 @@ public class loginActivity extends AppCompatActivity implements View.OnClickList
         mTvLoginactivityRegister.setOnClickListener(this);
 
         //控制全局变量
-        app = (UniteApp) getApplication();
+        uniteApp = (UniteApp) getApplication();
     }
 
     public void onClick(View view) {
@@ -114,8 +133,7 @@ public class loginActivity extends AppCompatActivity implements View.OnClickList
              *  finish();//销毁此Activity
              */
             case R.id.bt_loginactivity_login:
-                final String name = mEtLoginactivityUsername.getText().toString().trim();
-                final String password = mEtLoginactivityPassword.getText().toString().trim();
+                login();
 //                if (!TextUtils.isEmpty(name) && !TextUtils.isEmpty(password)) {
 //                    ArrayList<User> data = mDBOpenHelper.getAllUserData();
 //                    boolean match = false;
@@ -140,59 +158,136 @@ public class loginActivity extends AppCompatActivity implements View.OnClickList
 //                    Toast.makeText(this, "请输入你的用户名或密码", Toast.LENGTH_SHORT).show();
 //                }
 
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            Socket socket = new Socket("103.46.128.53", 43872);  //服务端实例化socket对象
-
-                            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(socket.getOutputStream(), "utf-8");
-                            InputStreamReader inputStreamReader = new InputStreamReader(socket.getInputStream(), "utf-8");
-                            //发送数据 格式为（登录，账号，密码）
-                            outputStreamWriter.write("in " + name + " " + password);
-                            outputStreamWriter.flush();
-
-                            //收到信息0代表是登录失败，1代表登录成功
-                            char[] a = new char[10];
-                            int length = inputStreamReader.read(a);
-
-                            if (a[0] == '1') {
-                                app.account = name;
-
-                                finish();
-
-                                Looper.prepare();
-                                Toast.makeText(loginActivity.this, "登录成功！欢迎回来!", Toast.LENGTH_LONG).show();
-                                Looper.loop();
-
-                            } else if (a[0] == '0') {
-
-                                //注册成功得到id
-                                String[] strings = (String.valueOf(a, 0, length)).split(" ");
-
-                                Looper.prepare();
-                                Toast.makeText(loginActivity.this, "账号或密码不正确!请重试！", Toast.LENGTH_LONG).show();
-                                Looper.loop();
-                            } else {
-                                Looper.prepare();
-                                Toast.makeText(loginActivity.this, "系统连接错误！", Toast.LENGTH_LONG).show();
-                                Looper.loop();
-                            }
-                            outputStreamWriter.close();
-                            inputStreamReader.close();
-                            socket.close();
-                        } catch (IOException e) {
-                            Looper.prepare();
-                            Toast.makeText(loginActivity.this, "系统连接错误！", Toast.LENGTH_LONG).show();
-                            Looper.loop();
-                            e.printStackTrace();
-                        }
-                    }
-                }).start();
+//                new Thread(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        try {
+//                            Socket socket = new Socket("103.46.128.53", 43872);  //服务端实例化socket对象
+//
+//                            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(socket.getOutputStream(), "utf-8");
+//                            InputStreamReader inputStreamReader = new InputStreamReader(socket.getInputStream(), "utf-8");
+//                            //发送数据 格式为（登录，账号，密码）
+//                            outputStreamWriter.write("in " + name + " " + password);
+//                            outputStreamWriter.flush();
+//
+//                            //收到信息0代表是登录失败，1代表登录成功
+//                            char[] a = new char[10];
+//                            int length = inputStreamReader.read(a);
+//
+//                            if (a[0] == '1') {
+//                                app.account = name;
+//
+//                                finish();
+//
+//                                Looper.prepare();
+//                                Toast.makeText(loginActivity.this, "登录成功！欢迎回来!", Toast.LENGTH_LONG).show();
+//                                Looper.loop();
+//
+//                            } else if (a[0] == '0') {
+//
+//                                //注册成功得到id
+//                                String[] strings = (String.valueOf(a, 0, length)).split(" ");
+//
+//                                Looper.prepare();
+//                                Toast.makeText(loginActivity.this, "账号或密码不正确!请重试！", Toast.LENGTH_LONG).show();
+//                                Looper.loop();
+//                            } else {
+//                                Looper.prepare();
+//                                Toast.makeText(loginActivity.this, "系统连接错误！", Toast.LENGTH_LONG).show();
+//                                Looper.loop();
+//                            }
+//                            outputStreamWriter.close();
+//                            inputStreamReader.close();
+//                            socket.close();
+//                        } catch (IOException e) {
+//                            Looper.prepare();
+//                            Toast.makeText(loginActivity.this, "系统连接错误！", Toast.LENGTH_LONG).show();
+//                            Looper.loop();
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                }).start();
 
                 break;
         }
     }
+
+    public void login(){
+        final String name = mEtLoginactivityUsername.getText().toString().trim();
+        final String password = mEtLoginactivityPassword.getText().toString().trim();
+
+        if (TextUtils.isEmpty(name) | TextUtils.isEmpty(password)) {
+            Toast.makeText(this, "请输入账号 or 密码", Toast.LENGTH_SHORT).show();
+            return;
+        }
+//        String url = "https://www.easy-mock.com/mock/5cf2759064873463eb866334/sell/login";
+        String url = "http://192.168.43.196:8080/login/" + name;
+        RxHttp.get(url)
+//                .asString()
+                .asObject(User.class)
+                .as(RxLife.asOnMain(this))
+                .subscribe(s -> {
+                    if (s.getName().equals(name) && s.getPassword().equals(password)) {
+                        Toast.makeText(LoginActivity.this, "登陆成功! " + name, Toast.LENGTH_SHORT).show();
+                        //设置用户全局信息，用于其他界面的初始化
+                        uniteApp.account = name;
+                        uniteApp.carbon_balance =s.getUser_carbon_bal();
+                        uniteApp.money = s.getMoney();
+
+                        // 登录成功后开始同步数据库
+                        httpGetAccountList(uniteApp.account);
+//                       List<AccountBean> accountBeanList = httpGetAccountList(uniteApp.account);
+//                        DBManager.syncHttpData(accountBeanList);
+//                        Log.d("ACCCCCCCC", accountBeanList.toString());
+//                        intent.putExtra("user", (Parcelable) s);
+                        SharedPreferences sp = getSharedPreferences("user", MODE_PRIVATE);
+                        SharedPreferences.Editor edit = sp.edit();
+                        edit.putString("name", s.getName());
+                        edit.putString("password", s.getPassword());
+                        edit.apply();
+
+                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }else {
+                        Toast.makeText(LoginActivity.this, "账号或者密码错误! " , Toast.LENGTH_SHORT).show();
+                    }
+                    Log.d(TAG, "login: " + s.toString());
+                }, throwable -> {
+                    Toast.makeText(this, "登陆失败~" + throwable, Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "login: " + throwable);
+                    Log.d(TAG, "login: " + name);
+                });
+    }
+
+
+
+
+    @SuppressLint("CheckResult")
+    public List<AccountBean> httpGetAccountList(String username) {
+        List<AccountBean> account = new ArrayList<>();
+
+        String url = "http://192.168.43.196:8080/accountList/" + username;
+        RxHttp.get(url)
+                .asString()
+                .subscribe(s -> {
+                    Gson gson = new Gson();
+                    AccountList accountList = gson.fromJson(s, AccountList.class);
+                    account.addAll(accountList.getData());
+
+                    //直接进行同步
+                    DBManager.syncHttpData(account);
+
+                    Log.d("QQ", "run: " + account.toString());
+
+                }, throwable -> {
+                    Log.d(TAG, "httpGetJson: ");
+                    Log.d(TAG, "httpGetJson: "+throwable);
+                    Toast.makeText(this, "获取信息失败" + throwable, Toast.LENGTH_SHORT).show();
+                });
+        return account;
+    }
+
 }
 
 

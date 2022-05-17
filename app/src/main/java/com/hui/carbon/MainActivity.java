@@ -4,21 +4,26 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.hui.carbon.adapter.AccountAdapter;
 import com.hui.carbon.db.AccountBean;
 import com.hui.carbon.db.DBManager;
+import com.hui.carbon.entity.AccountList;
 import com.hui.carbon.utils.BudgetDialog;
 
 import java.util.ArrayList;
@@ -26,6 +31,8 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import rxhttp.wrapper.param.RxHttp;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     ListView todayLv;  //展示今日收支情况的ListView
@@ -46,10 +53,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private MeActivity fm_me;
 
+    UniteApp uniteApp;
+    String TAG = "主活动";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        uniteApp = (UniteApp) getApplication();
         initTime();
         initView();
         preferences = getSharedPreferences("budget", Context.MODE_PRIVATE);
@@ -141,17 +152,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         day = calendar.get(Calendar.DAY_OF_MONTH);
     }
 
-    // 当activity获取焦点时，会调用的方法
-    @Override
-    protected void onResume() {
-        super.onResume();
-        loadDBData();
-        setTopTvShow();
-    }
+
 
     /* 设置头布局当中文本内容的显示*/
     private void setTopTvShow() {
-        System.out.println("hello");
 
         //获取今日排放和吸收总额，显示在view当中
         float incomeOneDay = DBManager.getSumMoneyOneDay(year, month, day, 1);
@@ -191,12 +195,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             topWarningTv.setText("已超标！");
         }
 
-        System.out.println("hello");
+
 
     }
 
     // 加载数据库数据
     private void loadDBData() {
+//        if(!uniteApp.account.equals("游客")){
+//            List<AccountBean> accountBeanList = httpGetAccountList(uniteApp.account);
+//            Log.d(TAG,accountBeanList.toString());
+//        }
         List<AccountBean> list = DBManager.getAccountListOneDayFromAccounttb(year, month, day);
         mDatas.clear();
         mDatas.addAll(list);
@@ -278,7 +286,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return dest;
     }
 
-    public  String getNumber(String str){
+    static public String getNumber(String str){
         // 控制正则表达式的匹配行为的参数(小数)
         Pattern p = Pattern.compile("(\\d+\\.\\d+)");
         //Matcher类的构造方法也是私有的,不能随意创建,只能通过Pattern.matcher(CharSequence input)方法得到该类的实例.
@@ -304,6 +312,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
+    @SuppressLint("CheckResult")
+    public List<AccountBean> httpGetAccountList(String username) {
+        List<AccountBean> account = new ArrayList<>();
+
+        String url = "http://192.168.43.196:8080/accountList/" + username;
+        RxHttp.get(url)
+                .asString()
+                .subscribe(s -> {
+                    Gson gson = new Gson();
+                    AccountList accountList = gson.fromJson(s, AccountList.class);
+                    account.addAll(accountList.getData());
+                    //直接进行同步
+                    DBManager.syncHttpData(account);
+                    Log.d("QQ", "run: " + accountList.toString());
+
+                }, throwable -> {
+                    Log.d(TAG, "httpGetJson: ");
+                    Log.d(TAG, "httpGetJson: "+throwable);
+                    Toast.makeText(this, "获取信息失败" + throwable, Toast.LENGTH_SHORT).show();
+                });
+        return account;
+    }
+
+    // 当activity获取焦点时，会调用的方法
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadDBData();
+        setTopTvShow();
+    }
 
 //    boolean isShow = true;
 //    /**
